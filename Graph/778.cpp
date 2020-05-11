@@ -58,3 +58,57 @@ public:
         return false;
     }
 };
+
+// Dijkstra's with distance between u->v is max{dist[u],value[v]}
+class Solution {
+public:
+    int n;
+    int target;
+    vector<int> value;
+    vector<int> dist;
+    vector<vector<int>> dir = {{-1,0},{1,0},{0,1},{0,-1}};
+    bool valid(int x,int y){
+        return (x >= 0 && x < n) && (y >= 0 && y < n);
+    }
+    int swimInWater(vector<vector<int>>& grid) {
+        n = grid.size();
+        value.resize(n*n);
+        target = n*n-1;
+        dist.assign(n*n,n*n*n*n);
+        vector<vector<int>> adj(n*n, vector<int>());
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < n; j++){
+                int u = n*i+j;
+                value[u] = grid[i][j];
+                for(auto arr : dir){
+                    int x = arr[0]+i;
+                    int y = arr[1]+j;
+                    if(valid(x,y)){
+                        int v = n*x+y;
+                        adj[u].push_back(v);
+                    }
+                }
+            }
+        }
+        dist[0] = value[0];
+        set<pair<int,int>> s; // <dist,node>
+        s.insert({dist[0],0});
+        int ans = -1;
+        while(s.size()){
+            int u = s.begin()->second;
+            s.erase(s.begin());
+            if(u == target) break;
+            for(auto v : adj[u]){
+                if(distance(u,v) < dist[v]){
+                    s.erase({dist[v],v});
+                    dist[v] = distance(u,v);
+                    s.insert({dist[v],v});
+                }
+            }
+        }
+        return dist[target];
+    }
+    int distance(int u, int v){
+        return max(dist[u], value[v]);
+    }
+};
